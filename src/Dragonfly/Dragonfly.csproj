@@ -1,0 +1,26 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net45</TargetFramework>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
+    <Copyright>Heather Floyd [www.HeatherFloyd.com]</Copyright>
+    <RepositoryType>GIT</RepositoryType>
+    <Authors>Heather Floyd</Authors>
+    <Company></Company>
+    <Product>Dragonfly</Product>
+    <Description>Content Workflow functionality &amp; tools for Umbraco</Description>
+    <PackageLicenseUrl>https://github.com/hfloyd/Dragonfly.Net/blob/master/LICENSE.md</PackageLicenseUrl>
+    <PackageProjectUrl>https://github.com/hfloyd/Dragonfly.Net</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/hfloyd/Dragonfly.Net</RepositoryUrl>
+    <PackageId>Dragonfly.UmbracoWorkflow</PackageId>
+    <Version>0.1.0</Version>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Configuration" />
+    <Reference Include="System.Web" />
+    <Reference Include="System.Web.Extensions" />
+  </ItemGroup>
+
+  <Import Project="..\Custom.targets" />
+</Project>
