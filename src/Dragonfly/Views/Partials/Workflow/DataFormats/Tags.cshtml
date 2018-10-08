@@ -1,0 +1,90 @@
+@using Dragonfly.Umbraco7Helpers
+@using Umbraco.Web
+
+@*
+    Example Usage:
+
+    //BOOTSTRAP COLOR OPTIONS: muted primary success info warning danger
+    var tagClasses = new Dictionary<string, string>()
+    {
+    { "INFO", "info"},
+    { "WARN", "warning"},
+    { "ERROR", "danger"},
+    { "Security", "danger"}
+    };
+
+    @{ Html.RenderPartial("/Views/Partials/Workflow/DataFormats/Tags.cshtml", node.TagsProperty, new ViewDataDictionary()
+       {
+           { "FancyFormat", true},
+           { "TagFilterName", "TagFilter" },
+           { "TagClasses", tagClasses}
+       }
+    ); }
+
+*@
+
+
+@model IEnumerable<string>
+
+@{
+    var tagData = Model.ToList();
+
+    var fancyFormat = Mvc.GetSafeViewDataBool(ViewData, "FancyFormat", true);
+    var tagFilterName = Mvc.GetSafeViewDataString(ViewData, "TagFilterName", "TagFilter");
+    var tagClasses = (Dictionary<string, string>)Mvc.GetSafeViewData(ViewData, "TagClasses", new Dictionary<string, string>());
+
+    if (tagData != null && tagData.Any())
+    {
+        if (fancyFormat)
+        {
+            foreach (var tag in tagData)
+            {
+                var tagHtml = "";
+                var thisTagClass = "label label-default";
+
+
+                if (tagClasses != null)
+                {
+                    var match = tagClasses.ContainsKey(tag) ? tagClasses[tag] : "";
+                    if (match != "")
+                    {
+                        thisTagClass = string.Format("label label-{0}", match);
+                    }
+                }
+
+                if (tagFilterName != "")
+                {
+
+                    var tagUrl = Dragonfly.NetHelpers.Url.AppendQueryStringToUrl(Request.Url, tagFilterName, tag);
+                    <a href="@tagUrl"><span class="@thisTagClass">@tag</span></a>
+                }
+                else
+                {
+                    <span class="@thisTagClass">@tag</span>
+                }
+
+            }
+
+        }
+        else
+        {
+            <span>@string.Join(", ", tagData)</span>
+        }
+
+    }
+    else
+    {
+        if (fancyFormat)
+        {
+            var tagUrl = Dragonfly.NetHelpers.Url.AppendQueryStringToUrl(Request.Url, tagFilterName, "none");
+
+            <a href="@tagUrl"><span class="label label-default">none</span></a>
+        }
+        else
+        {
+            <i>none</i>
+        }
+    }
+}
+
+

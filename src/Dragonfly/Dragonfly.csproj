@@ -8,19 +8,33 @@
     <Authors>Heather Floyd</Authors>
     <Company></Company>
     <Product>Dragonfly</Product>
-    <Description>Content Workflow functionality &amp; tools for Umbraco</Description>
-    <PackageLicenseUrl>https://github.com/hfloyd/Dragonfly.Net/blob/master/LICENSE.md</PackageLicenseUrl>
-    <PackageProjectUrl>https://github.com/hfloyd/Dragonfly.Net</PackageProjectUrl>
-    <RepositoryUrl>https://github.com/hfloyd/Dragonfly.Net</RepositoryUrl>
+    <Description>Content Workflow functionality &amp; tools for Umbraco (min Umbraco version 7.8)</Description>
+    <PackageLicenseUrl>https://github.com/hfloyd/Dragonfly.UmbracoWorkflow/blob/master/LICENSE.md</PackageLicenseUrl>
+    <PackageProjectUrl>https://github.com/hfloyd/Dragonfly.UmbracoWorkflow</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/hfloyd/Dragonfly.UmbracoWorkflow</RepositoryUrl>
     <PackageId>Dragonfly.UmbracoWorkflow</PackageId>
-    <Version>0.1.0</Version>
+    <Version>1.0.0</Version>
+    <AssemblyName>Dragonfly.UmbracoWorkflow</AssemblyName>
   </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Dragonfly.Net" Version="1.10.3" />
+    <PackageReference Include="Dragonfly.Umbraco7" Version="1.5.12" />
+    <PackageReference Include="RJP.UmbracoMultiUrlPicker" Version="2.2.0" />
+    <PackageReference Include="UmbracoCms.Core" Version="7.8.0" />
+  </ItemGroup>
   <ItemGroup>
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Configuration" />
     <Reference Include="System.Web" />
     <Reference Include="System.Web.Extensions" />
   </ItemGroup>
-
+  <ItemGroup>
+    <Content Include="Views/**/*.*">
+      <Pack>true</Pack>
+      <BuildAction>Content</BuildAction>
+      <IncludeInPackage>true</IncludeInPackage>
+      <CopyToOutput>true</CopyToOutput>
+    </Content>
+  </ItemGroup>
   <Import Project="..\Custom.targets" />
 </Project>

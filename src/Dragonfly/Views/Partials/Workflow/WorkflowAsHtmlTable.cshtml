@@ -1,0 +1,233 @@
+@using Dragonfly.UmbracoWorkflow
+@using Dragonfly.UmbracoWorkflow.Models
+
+@model IEnumerable<ICompWorkflow>
+
+@{
+    var filteredNodes = Model;
+    var allNodesCount = Dragonfly.Umbraco7Helpers.Mvc.GetSafeViewDataInt(ViewData, "AllNodesCount");
+    var isFiltered = Dragonfly.Umbraco7Helpers.Mvc.GetSafeViewDataBool(ViewData, "IsFiltered");
+    var filtersList = (Dictionary<string, string>)Dragonfly.Umbraco7Helpers.Mvc.GetSafeViewData(ViewData, "FiltersList");
+
+    //Additional View-level filters
+    var userFilter = Dragonfly.NetHelpers.Url.GetSafeQueryString(Request, "UserFilter");
+    if (userFilter != "")
+    {
+        isFiltered = true;
+        if (userFilter == "none")
+        {
+            filteredNodes = filteredNodes.Where(n => WorkflowHelper.GetUser(n.WorkflowAssignedTo) == null);
+        }
+        else
+        {
+            filteredNodes = filteredNodes.Where(n => WorkflowHelper.GetUser(n.WorkflowAssignedTo).Name == userFilter);
+        }
+
+        filtersList.Add("Assigned To", userFilter);
+    }
+
+    var parentFilter = Dragonfly.NetHelpers.Url.GetSafeQueryString(Request, "ParentFilter");
+    if (parentFilter != "")
+    {
+        isFiltered = true;
+        if (parentFilter == "---")
+        {
+            filteredNodes = filteredNodes.Where(n => n.Parent.Name == null);
+        }
+        else
+        {
+            filteredNodes = filteredNodes.Where(n => n.Parent.Name == parentFilter);
+        }
+
+        filtersList.Add("Parent", parentFilter);
+    }
+
+    var statusFilter = Dragonfly.NetHelpers.Url.GetSafeQueryString(Request, "StatusFilter");
+    if (statusFilter != "")
+    {
+        isFiltered = true;
+        if (statusFilter == "none")
+        {
+            filteredNodes = filteredNodes.Where(n => n.WorkflowCurrentStatus == "");
+        }
+        else
+        {
+            filteredNodes = filteredNodes.Where(n => n.WorkflowCurrentStatus == statusFilter);
+        }
+
+        filtersList.Add("Status", statusFilter);
+    }
+
+    var formatFilterInfo = filtersList.Select(n => string.Concat(n.Key, " is '", n.Value, "'"));
+    var filtersString = Dragonfly.NetHelpers.Strings.JoinAsText(", ", " and ", formatFilterInfo);
+
+    var counter = 0;
+}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/datatables/1.10.12/css/dataTables.bootstrap.min.css" rel="stylesheet" />
+
+    @*<style>
+            {
+
+            }
+        </style>*@
+    @*<!--<script src="/scripts/snippet-javascript-console.min.js?v=1"></script>-->*@
+</head>
+<body>
+    <div class="container">
+
+        <h1>All Content</h1>
+        <p>Total Nodes With Workflow Data: @allNodesCount</p>
+
+        @if (isFiltered)
+        {
+            <p>Displaying @filteredNodes.Count() pages filtered by @filtersString.</p>
+            <p><b><a class="btn btn-warning" href="Workflow">Remove Filters and Show All</a></b></p>
+        }
+
+        <table id="umbracodata" class="table table-striped table-bordered table-hover table-sm" cellspacing="0" style="width:100%">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Actions</th>
+                    <th>Parent</th>
+                    <th>Node Name</th>
+                    <th>Current Status</th>
+                    <th>Status Notes</th>
+                    <th>Assigned To</th>
+                    <th>Due Date</th>
+                    <th>Tags</th>
+                    <th>References</th>
+                    <th>Create Date</th>
+                    <th>Update Date</th>
+                    <th>DocType</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var node in filteredNodes)
+                {
+                    counter++;
+                    
+                    <tr>
+                        <td>@counter</td>
+
+                        @*//Actions*@
+                        <td>
+                            @{ Html.RenderPartial("/Views/Partials/Workflow/DataFormats/NodeActions.cshtml", node); }
+                        </td>
+
+                        <td>
+                                @{
+                                    var parent = node.Parent != null ? node.Parent.Name : "---";
+                                    var parentAsTag = parent.AsEnumerableOfOne();
+                                    Html.RenderPartial("/Views/Partials/Workflow/DataFormats/Tags.cshtml", parentAsTag, new ViewDataDictionary()
+                                    {
+                                        { "FancyFormat", true},
+                                        { "TagFilterName", "ParentFilter" }
+                                    }
+                                        ); }
+                                </td>
+                        
+
+                        <td>@node.Name</td>
+
+                        <td>
+                            @{
+                                var status = node.WorkflowCurrentStatus !="" ? node.WorkflowCurrentStatus : "none";
+                                var statusAsTag = status.AsEnumerableOfOne();
+                                Html.RenderPartial("/Views/Partials/Workflow/DataFormats/Tags.cshtml", statusAsTag, new ViewDataDictionary()
+                                               {
+                                                   { "FancyFormat", true},
+                                                   { "TagFilterName", "StatusFilter" }
+                                               }
+                                   ); }
+                        </td>
+                        <td>@node.WorkflowCurrentStatusNotes</td>
+
+                       
+                            <td>
+                                @{
+                                    var assignedUser = WorkflowHelper.GetUser(node.WorkflowAssignedTo);
+                                    var user = assignedUser != null ? assignedUser.Name : "none";
+                                    var userAsTag = user.AsEnumerableOfOne();
+                                    Html.RenderPartial("/Views/Partials/Workflow/DataFormats/Tags.cshtml", userAsTag, new ViewDataDictionary()
+                                    {
+                                        { "FancyFormat", true},
+                                        { "TagFilterName", "UserFilter" }
+                                    }
+                                        ); }
+                              
+                            </td>
+                       
+
+                        @if (node.WorkflowDueDate != DateTime.MinValue)
+                        {
+                            <td>@node.WorkflowDueDate</td>
+                        }
+                        else
+                        {
+                            <td></td>
+                        }
+
+                        @*//WorkflowTags*@
+                        @if (node.WorkflowTags != null && node.WorkflowTags.Any())
+                        {
+                            <td>
+                                @{ Html.RenderPartial("/Views/Partials/Workflow/DataFormats/Tags.cshtml", node.WorkflowTags, new ViewDataDictionary()
+                                                       {
+                                                           { "FancyFormat", true},
+                                                           { "TagFilterName", "TagFilter" },
+                                                           { "TagClasses", null}
+                                                       }
+                                     ); }
+                            </td>
+                        }
+                        else
+                        {
+                            <td></td>
+                        }
+
+                        @if (node.WorkflowReferences != null && node.WorkflowReferences.Any())
+                        {
+                            var linksHtml = WorkflowHelper.FormatLinks(node.WorkflowReferences);
+                            <td>@Html.Raw(linksHtml)</td>
+                        }
+                        else
+                        {
+                            <td></td>
+                        }
+
+                        <td>@node.CreateDate</td>
+                        <td>@node.UpdateDate</td>
+                        <td>@node.DocumentTypeAlias</td>
+                    </tr>
+                }
+
+            </tbody>
+        </table>
+
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/datatables/1.10.12/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/datatables/1.10.12/js/dataTables.bootstrap.min.js"></script>
+    <script type="text/javascript">
+    $(document).ready(function () {
+        $('#umbracodata').DataTable();
+        @*//$('#umbracodata').dataTable( {
+            //    "columns": [
+            //    { "width": "20%" },
+            //    null,
+            //    null,
+            //    null,
+            //    null
+            //        ]
+            //} );*@
+    });
+    </script>
+</body>
+</html>
