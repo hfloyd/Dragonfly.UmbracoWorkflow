@@ -2,7 +2,11 @@
 
 Content Workflow functionality & tools for Umbraco created by [Heather Floyd](https://www.HeatherFloyd.com).
 
-Available on NuGet: `Install-Package Dragonfly.UmbracoWorkflow`
+## Installation ##
+[![Nuget Downloads](https://buildstats.info/nuget/Dragonfly.UmbracoWorkflow)](https://www.nuget.org/packages/Dragonfly.UmbracoWorkflow/)
+
+    PM > Install-Package Dragonfly.UmbracoWorkflow
+
 
 ## How to Use ##
 
@@ -12,5 +16,6 @@ Access the workflow tool at
 
 http://Yoursite.com/Umbraco/backoffice/Api/WorkflowApi/Workflow
 
-##TO DO ##
+## TO DO ##
+
 Add Datatype/Doctype installation functionality to NuGet package
